@@ -72,6 +72,7 @@ add_executable(tracker src/tracker.cpp)
 target_link_libraries(tracker ${catkin_LIBRARIES} ${OpenNI2_LIBRARIES} ${Nite2_LIBRARY})
 add_dependencies(tracker openni2_tracker_generate_messages_cpp)
 
+
 install(TARGETS openni2_tracker RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 install(FILES openni2_tracker.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
