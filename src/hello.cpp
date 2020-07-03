@@ -13,6 +13,9 @@ std_msgs::Bool speak_switch;
 ros::Publisher shake_info_pub;
 //抓娃娃信号发布器
 ros::Publisher grasp_info_pub;
+
+//抓娃娃服务客户端
+
 //能哥语音信号发布齐器
 ros::Publisher voice_feedback_info_pub;
 
@@ -74,8 +77,9 @@ int main(int argc, char *argv[])
 
     ros::NodeHandle nh;
 
-    shake_info_pub = nh.advertise<std_msgs::Bool>("HandGestures_detection", 10);
+    shake_info_pub = nh.advertise<std_msgs::Bool>("handgesture_detection", 10);
     grasp_info_pub = nh.advertise<std_msgs::Bool>("GraspToys", 10);
+
     voice_feedback_info_pub = nh.advertise<std_msgs::String>("voiceSolve_res", 10);
 
     ros::Subscriber shakehand_sub = nh.subscribe("/user_intent", 1000, shakehand_chatterCallback);
