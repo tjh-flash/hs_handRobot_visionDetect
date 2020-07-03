@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
                 cv::Point p1(bdb.min.x, bdb.min.y);
                 cv::Point p2(bdb.max.x, bdb.max.y);
                 int area = (bdb.max.x - bdb.min.x)*(bdb.max.y - bdb.min.y);
-                std::cout << "矩形面积为:" << area << std::endl;
+                //std::cout << "矩形面积为:" << area << std::endl;
 
                 if(area <= 75000)
                 {

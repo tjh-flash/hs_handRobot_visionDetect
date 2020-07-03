@@ -28,6 +28,9 @@ void shakehand_chatterCallback(const std_msgs::String::ConstPtr& msg)
     //打印出接收到的语音信息
     std::cout << "接收语音信息成功!" << std::endl; 
     std::cout << "接收到的语音信息为: " << msg->data.c_str() << std::endl;
+
+    std_msgs::String voice_msg;
+    std::string ss;
     
     Json::Reader Json_reader;
     Json::Value Json_data;
@@ -43,6 +46,11 @@ void shakehand_chatterCallback(const std_msgs::String::ConstPtr& msg)
         std::cout << "接收握手信号成功" << std::endl;
         isShake.data = true;
         shake_info_pub.publish(isShake);
+
+        ss = "你好!";
+        voice_msg.data = ss.c_str();
+        voice_feedback_info_pub.publish(voice_msg);
+
     }
 
     if (intent == "grasp")
@@ -50,6 +58,10 @@ void shakehand_chatterCallback(const std_msgs::String::ConstPtr& msg)
         std::cout << "接收抓娃娃信号成功" << std::endl;
         isGrasp.data = true;
         grasp_info_pub.publish(isGrasp);
+
+        ss = "抓娃娃!";
+        voice_msg.data = ss.c_str();
+        voice_feedback_info_pub.publish(voice_msg);
     }
 
     
@@ -64,7 +76,7 @@ int main(int argc, char *argv[])
 
     shake_info_pub = nh.advertise<std_msgs::Bool>("HandGestures_detection", 10);
     grasp_info_pub = nh.advertise<std_msgs::Bool>("GraspToys", 10);
-    voice_feedback_info_pub = nh.advertise<std_msgs::String>("voice_feedback", 10);
+    voice_feedback_info_pub = nh.advertise<std_msgs::String>("voiceSolve_res", 10);
 
     ros::Subscriber shakehand_sub = nh.subscribe("/user_intent", 1000, shakehand_chatterCallback);
 
