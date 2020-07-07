@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 
     //Set VideoMode of Depth
     openni::VideoMode mDepthMode;
-    mDepthMode.setResolution(640,480);
+    mDepthMode.setResolution(1920,1080);
     mDepthMode.setFps(10);
     mDepthMode.setPixelFormat(openni::PIXEL_FORMAT_DEPTH_1_MM);
     mDepthStream.setVideoMode(mDepthMode);
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
     //Set VideoMode of Color
     openni::VideoMode mColorMode;
-    mColorMode.setResolution(640,480);
+    mColorMode.setResolution(1920,1080);
     mColorMode.setFps(10);
     mColorMode.setPixelFormat(openni::PIXEL_FORMAT_RGB888); 
     mColorStream.setVideoMode(mColorMode);
@@ -166,8 +166,15 @@ int main(int argc, char *argv[])
                 const nite::BoundingBox& bdb = user.getBoundingBox(); 
                 cv::Point p1(bdb.min.x, bdb.min.y);
                 cv::Point p2(bdb.max.x, bdb.max.y);
+
+                // p1.x = p1.x * (1920 / 512);
+                // p1.y = p1.y * (1080 / 424);
+                // p2.x = p2.x * (1920 / 512);
+                // p2.y = p2.y * (1080 / 424);
+
                 cv::rectangle(cImageBGR, p1, p2, cv::Scalar(0, 0, 255), 1, 8, 0);
                 std::cout << cImageBGR.size() << std::endl;
+    
             }
 
             //if(!user.isVisible() || user.isLost())

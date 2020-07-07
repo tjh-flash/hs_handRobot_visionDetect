@@ -2,6 +2,7 @@
 #include <std_msgs/String.h>
 #include <json/json.h>
 #include <std_msgs/Bool.h>
+#include <rb_msgAndSrv/rb_DoubleBool.h>
 
 #include <iostream>
 
@@ -12,9 +13,10 @@ std_msgs::Bool speak_switch;
 //握手信号发布器
 ros::Publisher shake_info_pub;
 //抓娃娃信号发布器
-ros::Publisher grasp_info_pub;
+//ros::Publisher grasp_info_pub;
 
 //抓娃娃服务客户端
+ros::ServiceClient grasp_client;
 
 //能哥语音信号发布齐器
 ros::Publisher voice_feedback_info_pub;
@@ -46,25 +48,26 @@ void shakehand_chatterCallback(const std_msgs::String::ConstPtr& msg)
     //检测到相关语音信息后发布握手信号
     if (intent == "SHAKEHAND")
     {
-        std::cout << "接收握手信号成功" << std::endl;
-        isShake.data = true;
-        shake_info_pub.publish(isShake);
-
         ss = "你好!";
         voice_msg.data = ss.c_str();
         voice_feedback_info_pub.publish(voice_msg);
 
+        std::cout << "接收握手信号成功" << std::endl;
+        isShake.data = true;
+        shake_info_pub.publish(isShake);  
     }
 
     if (intent == "grasp")
     {
-        std::cout << "接收抓娃娃信号成功" << std::endl;
-        isGrasp.data = true;
-        grasp_info_pub.publish(isGrasp);
-
         ss = "抓娃娃!";
         voice_msg.data = ss.c_str();
         voice_feedback_info_pub.publish(voice_msg);
+
+        std::cout << "接收抓娃娃信号成功" << std::endl;
+        //isGrasp.data = true;
+        //grasp_info_pub.publish(isGrasp);
+        rb_msgAndSrv::rb_DoubleBool grasp_client_srv;
+        grasp_client.call(grasp_client_srv); 
     }
 
     
@@ -78,7 +81,8 @@ int main(int argc, char *argv[])
     ros::NodeHandle nh;
 
     shake_info_pub = nh.advertise<std_msgs::Bool>("handgesture_detection", 10);
-    grasp_info_pub = nh.advertise<std_msgs::Bool>("GraspToys", 10);
+    //grasp_info_pub = nh.advertise<std_msgs::Bool>("GraspToys", 10);
+    grasp_client = nh.serviceClient<rb_msgAndSrv::rb_DoubleBool>("handClaw_grabDoll");
 
     voice_feedback_info_pub = nh.advertise<std_msgs::String>("voiceSolve_res", 10);
 
