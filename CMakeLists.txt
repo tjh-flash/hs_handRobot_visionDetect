@@ -77,7 +77,7 @@ install(TARGETS openni2_tracker RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINA
 install(FILES openni2_tracker.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 add_executable(hello src/hello.cpp)
-target_link_libraries(hello ${catkin_LIBRARIES} -ljson)
+target_link_libraries(hello ${catkin_LIBRARIES} -ljsoncpp)
 
 add_executable(vision_detect src/vision_detect.cpp)
 target_link_libraries(vision_detect ${catkin_LIBRARIES} ${OpenNI2_LIBRARIES} ${Nite2_LIBRARY})

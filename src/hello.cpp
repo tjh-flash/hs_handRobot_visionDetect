@@ -1,6 +1,6 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
-#include <json/json.h>
+#include <jsoncpp/json/json.h>
 #include <std_msgs/Bool.h>
 #include <rb_msgAndSrv/rb_DoubleBool.h>
 

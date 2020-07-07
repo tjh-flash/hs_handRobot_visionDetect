@@ -10,6 +10,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <sstream>
+#include <string>
 #include <std_msgs/String.h>
 #include <std_msgs/Bool.h>
 
@@ -27,6 +28,8 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
+#include <syscall.h>
 
 using namespace std;
 using namespace cv;
@@ -55,9 +58,16 @@ void switch_detection_Callback(const std_msgs::Bool::ConstPtr & msg)
     people_detection_switch.data = msg->data;
 }
 
+//绑定线程cpu命令
+std::string ss;
 
 int main(int argc, char *argv[])
 {
+    //绑定线程cpu
+    unsigned long int pid = syscall(SYS_gettid);
+    ss = "taskset -cp 3" + std::to_string(pid);
+    system(ss.c_str());
+
     //ROS初始化
     ros::init(argc, argv, "vision_detect_bridge");
     ros::NodeHandle nh;
