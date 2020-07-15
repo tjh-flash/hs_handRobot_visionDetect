@@ -5,14 +5,19 @@
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
+//#include <openni2_tracker/GetTrackState.h>
+#include <rb_msgAndSrv/rb_EmptyAndInt.h>
+
+#include <std_msgs/String.h>
+#include <std_msgs/Bool.h>
+#include <std_msgs/Int16.h>
 
 // C++ Dependencies
 #include <iostream>
 #include <stdio.h>
 #include <sstream>
 #include <string>
-#include <std_msgs/String.h>
-#include <std_msgs/Bool.h>
+
 
 // NITE Dependencies
 #include "NiTE.h"
@@ -30,7 +35,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include <syscall.h>
-
+#include <atomic>
 using namespace std;
 using namespace cv;
 
@@ -50,12 +55,19 @@ std_msgs::Bool people_detection_switch;
 std_msgs::Bool handgesture_detection_switch;
 
 //发送行人信息标志位
-int people_judge = 0 ;
+std::atomic<int> people_judge, judge_state ;
 
 //接收开关信息回调函数
 void switch_detection_Callback(const std_msgs::Bool::ConstPtr & msg)
 {
     people_detection_switch.data = msg->data;
+}
+
+bool vision_service_callback(rb_msgAndSrv::rb_EmptyAndInt::Request &req, rb_msgAndSrv::rb_EmptyAndInt::Response &res)
+{
+    res.res_data = judge_state;
+    std::cout << res.res_data << std::endl;
+    return true;
 }
 
 //绑定线程cpu命令
@@ -65,7 +77,8 @@ int main(int argc, char *argv[])
 {
     //绑定线程cpu
     unsigned long int pid = syscall(SYS_gettid);
-    ss = "taskset -cp 3" + std::to_string(pid);
+    std::cout << "pid: " << pid << std::endl;
+    ss = "taskset -cp 3 " + std::to_string(pid);
     system(ss.c_str());
 
     //ROS初始化
@@ -77,12 +90,16 @@ int main(int argc, char *argv[])
     ros::AsyncSpinner spinner(4);
     spinner.start();
     
+    //初始化行人信息标志位
+    people_judge = 0;
+    judge_state = 0;
 
     //定义ROS节点话题发布器和订阅器
     Pedestrians_info_pub = nh.advertise<std_msgs::Bool>("pedestrian_detection", 10);
     HandGestures_info_pub = nh.advertise<std_msgs::Bool>("handgesture_detection", 10);
     videphoto_feedback_pub = it.advertise("videphoto_feedback", 1);
     ros::Subscriber pedestrains_detection_sub  = nh.subscribe("switch_of_vision_detect", 1, switch_detection_Callback);
+    ros::ServiceServer vision_service = nh.advertiseService("get_people_track_state", vision_service_callback);
 
     //OpenNI初始化,打开Kinect,设置彩色和深度模式视频流
     openni::OpenNI::initialize();
@@ -128,7 +145,6 @@ int main(int argc, char *argv[])
     userTracker.setSkeletonSmoothingFactor(0.3f);
     handTracker.setSmoothingFactor(0.1f);
 
-
     //打开图像数据流开关
     //mDepthStream.start();
     mColorStream.start();
@@ -164,7 +180,7 @@ int main(int argc, char *argv[])
         
         if (users.getSize() == 0) 
         {
-             std::cout<< " no people approach, detection service waiting for call!" << std::endl;
+             //std::cout<< " no people approach, detection service waiting for call!" << std::endl;
              sensor_msgs::ImagePtr Imagemsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", cImageBGR).toImageMsg();
              videphoto_feedback_pub.publish(Imagemsg);
              continue;
@@ -191,6 +207,7 @@ int main(int argc, char *argv[])
                 if(area <= 75000)
                 {
                     people_judge = 1;
+                    //std::cout << "people_judge: "<<people_judge<<std::endl;
                     cv::rectangle(cImageBGR, p1, p2, cv::Scalar(0, 0, 255), 5, 8, 0);
                 }
 
@@ -214,18 +231,20 @@ int main(int argc, char *argv[])
 
         if ( people_judge == 0 )
         {
-            std::cout<< " No people detected, safe!" << std::endl;
+            //std::cout<< " No people detected, safe!" << std::endl;
             pedestrians_info.data = false;
             Pedestrians_info_pub.publish(pedestrians_info);
             handgesture_detection_switch.data = false;
+            judge_state = 0;
         }
         else if ( people_judge == 1)
         {
-            std::cout << " People detected, please slow down!" << std::endl;
+            //std::cout << " People detected, please slow down!" << std::endl;
             pedestrians_info.data = true;
             Pedestrians_info_pub.publish(pedestrians_info);
             people_judge = 0;
-            handgesture_detection_switch.data = true;
+            handgesture_detection_switch.data = false;
+            judge_state = 1;
         }
 
         if ( handgesture_detection_switch.data == true )
@@ -256,8 +275,8 @@ int main(int argc, char *argv[])
                     cv::Point2f PDR(Point.x + 30, Point.y + 30);
                     cv::rectangle(cImageBGR, PTL, PDR, cv::Scalar(255, 0, 0), 2, 8, 0);
 
-                    handgestures_info.data = true;
-                    HandGestures_info_pub.publish(handgestures_info);
+                    // handgestures_info.data = true;
+                    // HandGestures_info_pub.publish(handgestures_info);
 
                     //handgestures_info.data = false;
                 }

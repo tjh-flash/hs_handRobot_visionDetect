@@ -14,7 +14,9 @@ find_package(catkin REQUIRED COMPONENTS
 										OpenCV
 										cv_bridge
 										image_transport
-                                        message_generation)
+										message_generation
+										rb_msgAndSrv
+										hirop_msgs)
 
 include_directories(${catkin_INCLUDE_DIRS})
 find_package(orocos_kdl REQUIRED)
@@ -23,6 +25,11 @@ add_message_files(
 	FILES
 	TrackerUser.msg
 	TrackerUserArray.msg
+)
+
+add_service_files(
+	FILES
+	GetTrackState.srv
 )
 
 generate_messages(

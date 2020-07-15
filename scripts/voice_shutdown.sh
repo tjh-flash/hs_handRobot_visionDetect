@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo -S sh voice_shutdown_order.sh << EOF
+sudo -S sh /home/de/catkin_ws/src/HS_HandGrasp/openni2_tracker/scripts/voice_shutdown_order.sh << EOF
 0
 EOF
 
